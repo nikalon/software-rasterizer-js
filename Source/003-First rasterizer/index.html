@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Primer rasterizador básico</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+    <body>
+        <canvas id="viewer" width="640" height="480"></canvas>
+        <br/>
+        <input id="inputfile" type="file" style="display: none" />
+
+        <div class="output" style="display: none">
+            <p>OBJ parser log</p>
+            <ul id="logoutput"></ul>
+        </div>
+        <p>Interpolación lineal de colores mediante coordenadas baricéntricas. Se han pintado todos los pixeles del canvas proceduralmente.</p>
+
+        <script src="canvas.js"></script>
+    </body>
+</html>

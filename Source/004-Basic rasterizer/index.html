@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Rasterizador básico</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+    <body>
+        <canvas id="viewer" width="640" height="480"></canvas>
+        <br/>
+        <button id="removemodel" disabled="disabled">Eliminar modelo</button>
+        <input id="inputfile" type="file" />
+
+        <div class="output">
+            <p>OBJ parser log</p>
+            <ul id="logoutput"></ul>
+        </div>
+
+        <script src="canvas.js"></script>
+    </body>
+</html>
