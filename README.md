@@ -1,2 +1,2 @@
-# software-rasterizer-js
-Proyectos semanales que hice para crear un software rasterizer
+# Rasterizer
+Este reprositorio contiene proyectos semanales que hice para aprender a crear un software rasterizer.
