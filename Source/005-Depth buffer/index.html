@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Rasterizador básico</title>
+        <title>Depth buffer</title>
         <link rel="stylesheet" type="text/css" href="styles.css">
     </head>
     <body>
@@ -17,10 +17,11 @@
             <ul id="logoutput"></ul>
         </div>
 
+        <p>He implementado un z-buffer y ahora la malla se visualiza con la profundidad correcta. Usa como comparativa el <a href="../004-Basic rasterizer/index.html">anterior rasterizador</a>.</p>
         <p>Limitaciones:</p>
         <ul>
-            <li>A veces se renderizan por encima triángulos no visibles. Esto se solucionará en el futuro implementando un z-buffer.</li>
             <li>La interpolación entre colores no es correcta dependiendo de la perspectiva del triángulo y la cámara.</li>
+            <li>No hay soporte para colores transparentes.</li>
         </ul>
 
         <script src="canvas.js"></script>
