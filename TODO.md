@@ -9,6 +9,7 @@
 - Implementar model matrix para transformar las coordenadas locales a globales
     - Cargar más modelos en la escena
 - Corregir interpolación de colores en base a la orientación del triángulo en pantalla
+- Anti alias
 
 # Terminado
 - Cargar ficheros .obj con sus vértices, triángulos y colores en los vértices
