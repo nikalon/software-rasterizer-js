@@ -2,6 +2,7 @@ let log_output;
 let viewer;
 let input_file;
 let remove_model_button;
+let fps_counter;
 
 let ctx;
 let canvas_width;
@@ -9,6 +10,8 @@ let canvas_height;
 let depth_buffer;
 let image_data;
 let mesh;
+const fps_smoothing = 0.9; // larger = more smoothing
+let fps_smoothed = 0;
 
 const MM_PER_INCH = 25.4;
 
@@ -393,6 +396,8 @@ function clear_depth_buffer(depth_buffer) {
 }
 
 function frame() {
+    let frame_start_time = performance.now();
+
     clear_depth_buffer(depth_buffer);
 
     // Clear canvas with background gradient
@@ -500,7 +505,15 @@ function frame() {
 
     // Render scene
     ctx.putImageData(image_data, 0, 0);
-    //window.requestAnimationFrame(frame);
+
+    // Print FPS
+    let frame_end_time = performance.now();
+    let frame_elapsed_time = frame_end_time - frame_start_time;
+    let fps = Math.round(1/(frame_elapsed_time / 1000));
+    fps_smoothed = (fps_smoothed * fps_smoothing) + (fps * (1.0 - fps_smoothing))
+    fps_counter.innerText = `${Math.round(fps_smoothed)} FPS`;
+
+    window.requestAnimationFrame(frame);
 }
 
 window.onload = () => {
@@ -508,6 +521,7 @@ window.onload = () => {
     viewer = document.getElementById("viewer");
     input_file = document.getElementById("inputfile");
     remove_model_button = document.getElementById("removemodel");
+    fps_counter = document.getElementById("fpscounter");
 
     const handle_attach_file = () => {
         if (input_file.files.length > 0) {
@@ -516,7 +530,6 @@ window.onload = () => {
             reader.onload = function(e) {
                 let file_content = e.target.result;
                 mesh = parse_obj_string_and_display_messages(file_content);
-                window.requestAnimationFrame(frame);
             };
             reader.readAsText(file);
 
@@ -529,7 +542,6 @@ window.onload = () => {
 
     remove_model_button.addEventListener("click", () => {
         mesh = null;
-        window.requestAnimationFrame(frame);
 
         // Update UI
         input_file.value = null;
@@ -545,9 +557,7 @@ window.onload = () => {
     canvas_height = viewer.height;
 
     depth_buffer = new Array(canvas_width * canvas_height);
-
     image_data = ctx.createImageData(canvas_width, canvas_height);
 
-    frame();
     window.requestAnimationFrame(frame);
 }
