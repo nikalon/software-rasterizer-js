@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Depth buffer</title>
+        <title>Interpolación de colores con perspectiva correcta</title>
         <link rel="stylesheet" type="text/css" href="styles.css">
     </head>
     <body>
@@ -17,10 +17,9 @@
             <ul id="logoutput"></ul>
         </div>
 
-        <p>He implementado un z-buffer y ahora la malla se visualiza con la profundidad correcta. Usa como comparativa el <a href="../004-Basic rasterizer/index.html">anterior rasterizador</a>.</p>
+        <p>He corregido la interpolación de colores según la perspectiva del triángulo con respecto la cámara. Carga un triángulo y compara con el resultado del <a href="../005-Depth buffer/index.html">ejercicio anterior</a>.</p>
         <p>Limitaciones:</p>
         <ul>
-            <li>La interpolación entre colores no es correcta dependiendo de la perspectiva del triángulo y la cámara.</li>
             <li>No hay soporte para colores transparentes.</li>
             <li>No hay soporte para suavizar los bordes mediante un anti alias</li>
         </ul>
