@@ -17,3 +17,6 @@
 - Rasterizador básico con colores planos
 - Backface culling
 - Z-buffer
+
+# Bugs
+- Cuando un triángulo grande sobresale de pantalla no se renderiza. Pista: edge() retorna un área negativa para el triángulo.
