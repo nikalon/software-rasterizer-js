@@ -447,10 +447,10 @@ function frame() {
             let triangle_area_doubled = edge(r0, r1, r2);
 
             // Render this triangle into the canvas
-            let r_min_x = Math.floor(Math.min(r0.x, r1.x, r2.x));
-            let r_max_x = Math.ceil (Math.max(r0.x, r1.x, r2.x));
-            let r_min_y = Math.floor(Math.min(r0.y, r1.y, r2.y));
-            let r_max_y = Math.ceil (Math.max(r0.y, r1.y, r2.y));
+            let r_min_x = Math.max(0, Math.floor(Math.min(r0.x, r1.x, r2.x)));
+            let r_max_x = Math.min(canvas_width, Math.ceil (Math.max(r0.x, r1.x, r2.x)));
+            let r_min_y = Math.max(0, Math.floor(Math.min(r0.y, r1.y, r2.y)));
+            let r_max_y = Math.min(canvas_height, Math.ceil (Math.max(r0.y, r1.y, r2.y)));
             for (let x = r_min_x; x < r_max_x; x++) {
                 for (let y = r_min_y; y < r_max_y; y++) {
                     let p = new Vec2(x, y);
@@ -475,9 +475,6 @@ function frame() {
                             depth_buffer[canvas_i] = point_z;
 
                             // Interpolate color for this pixel using barycentric coordinates
-                            //let color_1 = c0.mult_scalar(w0);
-                            //let color_2 = c1.mult_scalar(w1);
-                            //let color_3 = c2.mult_scalar(w2);
                             let color_1 = c0.mult_scalar(w0).mult_scalar(1/r0.z);
                             let color_2 = c1.mult_scalar(w1).mult_scalar(1/r1.z);
                             let color_3 = c2.mult_scalar(w2).mult_scalar(1/r2.z);
