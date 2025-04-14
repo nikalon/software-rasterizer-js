@@ -2,6 +2,10 @@ let log_output;
 let viewer;
 let input_file;
 let remove_model_button;
+let boat_button;
+let cube_button;
+let monkey_button;
+let triangle_button;
 let fps_counter;
 
 let ctx;
@@ -518,7 +522,32 @@ window.onload = () => {
     viewer = document.getElementById("viewer");
     input_file = document.getElementById("inputfile");
     remove_model_button = document.getElementById("removemodel");
+    boat_button = document.getElementById("boatbutton");
+    cube_button = document.getElementById("cubebutton");
+    monkey_button = document.getElementById("monkeybutton");
+    triangle_button = document.getElementById("trianglebutton");
     fps_counter = document.getElementById("fpscounter");
+
+    const ui_reset_model_load_form = () => {
+        // Update UI
+        input_file.value = null;
+        log_output.innerHTML = null;
+        input_file.disabled = false;
+    };
+
+    const load_obj_mesh_from_url = async (url) => {
+        let req = await fetch(url);
+        let file_content = await req.text();
+        mesh = parse_obj_string_and_display_messages(file_content);
+
+        // Update UI
+        ui_reset_model_load_form();
+    };
+
+    boat_button.addEventListener("click", () => load_obj_mesh_from_url("/Assets/Bote coloreado.obj"));
+    cube_button.addEventListener("click", () => load_obj_mesh_from_url("/Assets/Cubo coloreado.obj"));
+    monkey_button.addEventListener("click", () => load_obj_mesh_from_url("/Assets/Mono radiactivo.obj"));
+    triangle_button.addEventListener("click", () => load_obj_mesh_from_url("/Assets/Triangulo coloreado.obj"));
 
     const handle_attach_file = () => {
         if (input_file.files.length > 0) {
@@ -532,19 +561,13 @@ window.onload = () => {
 
             // Update UI
             input_file.disabled = true;
-            remove_model_button.disabled = false;
         }
     };
     input_file.addEventListener("change", handle_attach_file, false);
 
     remove_model_button.addEventListener("click", () => {
         mesh = null;
-
-        // Update UI
-        input_file.value = null;
-        log_output.innerHTML = null;
-        input_file.disabled = false;
-        remove_model_button.disabled = true;
+        ui_reset_model_load_form();
     });
 
     ctx = viewer.getContext("2d");
