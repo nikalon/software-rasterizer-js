@@ -544,10 +544,10 @@ window.onload = () => {
         ui_reset_model_load_form();
     };
 
-    boat_button.addEventListener("click", () => load_obj_mesh_from_url("/Assets/Bote coloreado.obj"));
-    cube_button.addEventListener("click", () => load_obj_mesh_from_url("/Assets/Cubo coloreado.obj"));
-    monkey_button.addEventListener("click", () => load_obj_mesh_from_url("/Assets/Mono radiactivo.obj"));
-    triangle_button.addEventListener("click", () => load_obj_mesh_from_url("/Assets/Triangulo coloreado.obj"));
+    boat_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Bote coloreado.obj"));
+    cube_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Cubo coloreado.obj"));
+    monkey_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Mono radiactivo.obj"));
+    triangle_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Triangulo coloreado.obj"));
 
     const handle_attach_file = () => {
         if (input_file.files.length > 0) {
