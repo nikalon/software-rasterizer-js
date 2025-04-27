@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Matriz de proyección</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+    <body>
+        <canvas id="viewer" width="640" height="480"></canvas>
+        <br/>
+        <div id="fpscounter">0 FPS</div>
+
+        <div>
+            <button id="boatbutton">Bote</button>
+            <button id="cubebutton">Cubo</button>
+            <button id="monkeybutton">Mono</button>
+            <button id="trianglebutton">Triangulo</button>
+        </div>
+        <div>
+            <button id="removemodel">Eliminar modelo</button>
+            <input id="inputfile" type="file" />
+        </div>
+
+        <div class="output">
+            <p>OBJ parser log</p>
+            <ul id="logoutput"></ul>
+        </div>
+
+        <p>Se ha modificado ligeramente el código para implementar una matriz de proyección. Esta matriz está basada en <a href="https://gamemath.com/book/graphics.html#clip_space_scale">la que se usa en OpenGL</a> con la única diferencia de que ha sido transpuesta, ya que en este código base ordenamos los vectores como filas.</p>
+        <h2>Limitaciones</h2>
+        <ul>
+            <li>No se ha implementado la operación de <b>clipping</b> aún. Esto implica que se renderizan triángulos fuera de la visión de la cámara.</li>
+        </ul>
+
+        <script src="canvas.js"></script>
+    </body>
+</html>
