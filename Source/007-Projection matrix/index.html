@@ -11,11 +11,11 @@
         <br/>
         <div id="fpscounter">0 FPS</div>
 
-        <div>
+        <div class="buttons">
             <button id="boatbutton">Bote</button>
             <button id="cubebutton">Cubo</button>
             <button id="monkeybutton">Mono</button>
-            <button id="trianglebutton">Triangulo</button>
+            <button id="trianglebutton">Triángulo</button>
         </div>
         <div>
             <button id="removemodel">Eliminar modelo</button>
@@ -28,9 +28,10 @@
         </div>
 
         <p>Se ha modificado ligeramente el código para implementar una matriz de proyección. Esta matriz está basada en <a href="https://gamemath.com/book/graphics.html#clip_space_scale">la que se usa en OpenGL</a> con la única diferencia de que ha sido transpuesta, ya que en este código base ordenamos los vectores como filas.</p>
-        <h2>Limitaciones</h2>
+        <h2>Limitaciones y bugs</h2>
         <ul>
-            <li>No se ha implementado la operación de <b>clipping</b> aún. Esto implica que se renderizan triángulos fuera de la visión de la cámara.</li>
+            <li>No se ha implementado aún la operación de <b>clipping</b>. Esto implica que se renderizan triángulos fuera de la visión de la cámara.</li>
+            <li>Los objetos se mueven erráticamente debido a la variabilidad de los FPS.</li>
         </ul>
 
         <script src="canvas.js"></script>

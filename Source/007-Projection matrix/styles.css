@@ -18,3 +18,14 @@
 .output ul {
     padding-left: 20px;
 }
+
+.buttons {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.buttons button {
+    height: 50px;
+    min-width: 100px;
+    font-size: 18px;
+}

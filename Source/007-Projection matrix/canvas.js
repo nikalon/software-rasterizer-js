@@ -1,3 +1,7 @@
+const MM_PER_INCH = 25.4;
+const PI2 = Math.PI * 2;
+
+// UI
 let log_output;
 let viewer;
 let input_file;
@@ -8,16 +12,21 @@ let monkey_button;
 let triangle_button;
 let fps_counter;
 
+// Scene
 let ctx;
 let canvas_width;
 let canvas_height;
 let depth_buffer;
 let image_data;
+
+// Object
 let mesh;
+const angular_velocity = Math.PI; // Radians / Second
+let rot_y_rad = 0;
+let y_pos = 0;
+
 const fps_smoothing = 0.9; // larger = more smoothing
 let fps_smoothed = 0;
-
-const MM_PER_INCH = 25.4;
 
 // ====================================================================================================================
 // Camera
@@ -67,30 +76,6 @@ class Mat44 {
         this.elems = [x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, w1, w2, w3, w4];
     }
 
-    mult_point(vec3) {
-        // Multiply Cartesian point. Assume w coordinate is 1.
-        let x1 = this.elems[0]  * vec3.x;
-        let x2 = this.elems[4]  * vec3.y;
-        let x3 = this.elems[8]  * vec3.z;
-        let x4 = this.elems[12];
-        let x = x1 + x2 + x3 + x4;
-
-        let y1 = this.elems[1]  * vec3.x;
-        let y2 = this.elems[5]  * vec3.y;
-        let y3 = this.elems[9]  * vec3.z;
-        let y4 = this.elems[13];
-        let y = y1 + y2 + y3 + y4;
-
-        let z1 = this.elems[2]  * vec3.x;
-        let z2 = this.elems[6]  * vec3.y;
-        let z3 = this.elems[10] * vec3.z;
-        let z4 = this.elems[14];
-        let z = z1 + z2 + z3 + z4;
-
-        let out = new Vec3(x, y, z);
-        return out;
-    }
-
     mult_homogeneous_point(vec3) {
         // Multiply homogeneous point. Assume w coordinate is 1.
         let x1 = this.elems[0]  * vec3.x;
@@ -111,12 +96,12 @@ class Mat44 {
         let z4 = this.elems[14];
         let z = z1 + z2 + z3 + z4;
 
-        let w = -vec3.z;
-
         // @NOTE: we don't check division by zero but I don't want to put a branch in here just for that special case
-        x /= w;
-        y /= w;
-        z /= w;
+        let w = 1/(-vec3.z);
+
+        x *= w;
+        y *= w;
+        z *= w;
 
         let out = new Vec3(x, y, z);
         return out;
@@ -207,6 +192,31 @@ class Vec3 {
 
         return res;
     }
+
+    mult_mat(mat44) {
+        // Multiply Vec3 to 4x4 Matrix. Assume w coordinate is 1.
+        let x1 = mat44.elems[0]  * this.x;
+        let x2 = mat44.elems[4]  * this.y;
+        let x3 = mat44.elems[8]  * this.z;
+        let x4 = mat44.elems[12];
+        let x = x1 + x2 + x3 + x4;
+
+        let y1 = mat44.elems[1]  * this.x;
+        let y2 = mat44.elems[5]  * this.y;
+        let y3 = mat44.elems[9]  * this.z;
+        let y4 = mat44.elems[13];
+        let y = y1 + y2 + y3 + y4;
+
+        let z1 = mat44.elems[2]  * this.x;
+        let z2 = mat44.elems[6]  * this.y;
+        let z3 = mat44.elems[10] * this.z;
+        let z4 = mat44.elems[14];
+        let z = z1 + z2 + z3 + z4;
+
+        let out = new Vec3(x, y, z);
+        return out;
+    }
+
 }
 
 // ====================================================================================================================
@@ -432,7 +442,7 @@ let world_to_camera = new Mat44(-0.954241, 0.086124, -0.286371,  0.000000,
 
 function vertex_to_raster_space(vec, camera, view_matrix, projection_matrix) {
     // Transform world coordinates to camera space
-    let cam_a = view_matrix.mult_point(vec);
+    let cam_a = vec.mult_mat(view_matrix);
 
     // Transform to NDC coordinates in the range [-1, 1]
     let ndc_a = projection_matrix.mult_homogeneous_point(cam_a);
@@ -483,9 +493,19 @@ function clear_depth_buffer(depth_buffer) {
     }
 }
 
+let frame_last_elapsed_time = 0;
 function frame() {
     let frame_start_time = performance.now();
 
+    // ================================================================================================================
+    // Simulation tick
+    rot_y_rad += angular_velocity / 1000 * frame_last_elapsed_time;
+    rot_y_rad = rot_y_rad % PI2;
+
+    y_pos = Math.sin(performance.now() / 500);
+
+    // ================================================================================================================
+    // Render scene
     clear_depth_buffer(depth_buffer);
 
     // Clear canvas with background gradient
@@ -511,6 +531,16 @@ function frame() {
 
     // Render mesh
     if (mesh != null) {
+        let mat_rot = new Mat44(Math.cos(rot_y_rad),    0,   -Math.sin(rot_y_rad),    0,
+                                                  0,    1,                      0,    0,
+                                Math.sin(rot_y_rad),    0,    Math.cos(rot_y_rad),    0,
+                                                  0,    0,                      0,    1);
+        let mat_pos = new Mat44(1,     0, 0, 0,
+                                0,     1, 0, 0,
+                                0,     0, 1, 0,
+                                0, y_pos, 0, 1);
+        let mat_trans = mat_rot.mult(mat_pos);
+
         for (let i = 0; i < mesh.triangles.length; i += 3) {
             // Load vertices for this triangle
             let a = new Vec3();
@@ -527,6 +557,12 @@ function frame() {
 
             let c2 = new Vec3();
             mesh.get_vertex_colors_at(i + 2, c2);
+
+            // Rotate mesh around Y axis
+            // @TODO: Factorize mesh, rotation, translation and scale into a single object/entity abstraction
+            a = a.mult_mat(mat_trans);
+            b = b.mult_mat(mat_trans);
+            c = c.mult_mat(mat_trans);
 
             // Transform from local space coordinates to raster coordinates
             // @TODO: Implement clipping
@@ -594,8 +630,9 @@ function frame() {
 
     // Print FPS
     let frame_end_time = performance.now();
-    let frame_elapsed_time = frame_end_time - frame_start_time;
-    let fps = Math.round(1/(frame_elapsed_time / 1000));
+    frame_last_elapsed_time = frame_end_time - frame_start_time;
+
+    let fps = Math.round(1/(frame_last_elapsed_time / 1000));
     fps_smoothed = (fps_smoothed * fps_smoothing) + (fps * (1.0 - fps_smoothing))
     fps_counter.innerText = `${Math.round(fps_smoothed)} FPS`;
 
@@ -624,12 +661,9 @@ window.onload = () => {
         let req = await fetch(url);
         let file_content = await req.text();
         mesh = parse_obj_string_and_display_messages(file_content);
-
-        // Update UI
-        ui_reset_model_load_form();
     };
 
-    boat_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Bote coloreado.obj"));
+    boat_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Bote coloreado 2.obj"));
     cube_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Cubo coloreado.obj"));
     monkey_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Mono radiactivo.obj"));
     triangle_button.addEventListener("click", () => load_obj_mesh_from_url("../../Assets/Triangulo coloreado.obj"));
