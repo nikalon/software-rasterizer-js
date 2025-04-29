@@ -7,6 +7,7 @@
     - Cargar más modelos en la escena
 - Anti alias
 - Clipping
+- Cámara ortográfica
 
 # Terminado
 - Cargar ficheros .obj con sus vértices, triángulos y colores en los vértices
