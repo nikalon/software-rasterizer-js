@@ -23,3 +23,6 @@
 # Bugs
 - Cuando un triángulo grande sobresale de pantalla no se renderiza. Pista: edge() retorna un área negativa para el triángulo.
     - Esto se solucionará implementando la operación de clipping
+- Movimiento y rotación no consistentes debido a la variabilidad del framerate
+    - Implementar velocidad uniforme independientemente de los FPS
+    - Implementar un limitador de FPS

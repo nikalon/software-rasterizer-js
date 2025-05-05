@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Controles de cámara</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+    <body>
+        <canvas id="viewer" width="640" height="480"></canvas>
+        <br/>
+        <div>
+            <div id="fpscounter">0 FPS</div>
+            <input id="rotate" type="checkbox" name="" value="">
+            <label for="rotate">Animar objeto</label>
+        </div>
+
+        <div class="buttons">
+            <button id="boatbutton">Bote</button>
+            <button id="cubebutton">Cubo</button>
+            <button id="monkeybutton">Mono</button>
+            <button id="trianglebutton">Triángulo</button>
+        </div>
+        <div>
+            <button id="removemodel">Eliminar modelo</button>
+            <input id="inputfile" type="file" />
+        </div>
+
+        <div class="output">
+            <p>OBJ parser log</p>
+            <ul id="logoutput"></ul>
+        </div>
+
+        <h2>Limitaciones y bugs</h2>
+        <ul>
+            <li>No se ha implementado aún la operación de <b>clipping</b>. Esto implica que se renderizan triángulos fuera de la visión de la cámara.</li>
+            <li>Los objetos se mueven erráticamente debido a la variabilidad de los FPS.</li>
+            <li>Los objetos no rotan a velocidad uniforme. Esto es debido a la variabilidad de los FPS.</li>
+        </ul>
+
+        <script src="canvas.js"></script>
+    </body>
+</html>
