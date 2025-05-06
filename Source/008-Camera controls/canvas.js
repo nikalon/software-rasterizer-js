@@ -31,12 +31,16 @@ const fps_smoothing = 0.9; // larger = more smoothing
 let fps_smoothed = 0;
 
 // Camera controls
+const mouse_rotate_amplitude = 0.01;
+const mouse_track_amplitude = 0.03;
+
 let mouse_down = false;
 let mouse_pos_x = 0;
 let mouse_pos_y = 0;
 let mouse_last_pos_x = 0;
 let mouse_last_pos_y = 0;
 let mouse_wheel_dir = 0;
+let shift_down = false;
 
 // ====================================================================================================================
 // Camera
@@ -60,11 +64,11 @@ class Camera {
 
         // ============================================================================================================
         // Orbit camera
-        this.target_pos = new Vec3(0, 0, 0);
+        this.target_pos = new Vec3(0, 0, 0); // In world coordinates
         this.target_dist = 15;
-        this.target_min_dist = 3;
-        this.orbit_v = 0.6; // Constrained in the range [-PI/2, PI/2]
-        this.orbit_h = Math.PI; // Constrained in the range [0, 2PI)
+        this.target_min_dist = 5;
+        this.orbit_rot_x = -0.4; // Constrained in the range [-PI/2, PI/2]
+        this.orbit_rot_y = Math.PI + 0.5; // Constrained in the range [0, 2PI)
     }
 
     get_projection_matrix() {
@@ -89,50 +93,57 @@ class Camera {
     get_world_to_camera_matrix() {
         // Old view matrix used in previous exercices. Left here as reference.
         /*let world_to_camera = new Mat44(-0.954241, 0.086124, -0.286371,  0.000000,
-                                         0.000000, 0.957630,  0.288002,  0.000000,
-                                         0.299040, 0.274823, -0.913809,  0.000000,
-                                         0.668532, -3.076821,-16.194227, 1.000000);*/
+                                           0.000000, 0.957630,  0.288002,  0.000000,
+                                           0.299040, 0.274823, -0.913809,  0.000000,
+                                           0.668532, -3.076821,-16.194227, 1.000000);*/
+
+        // Move target to position
+        let mat_translate = Mat44.translate(-this.target_pos.x, -this.target_pos.y, -this.target_pos.z);
 
         // Rotate camera around target
-        let mat_rotate_y = new Mat44(Math.cos(this.orbit_h), 0, -Math.sin(this.orbit_h), 0,
-                                                          0, 1,                       0, 0,
-                                     Math.sin(this.orbit_h), 0,  Math.cos(this.orbit_h), 0,
-                                                          0, 0,                       0, 1);
-
-        let mat_rotate_x = new Mat44(1,                       0,                      0, 0,
-                                     0,  Math.cos(this.orbit_v), Math.sin(this.orbit_v), 0,
-                                     0, -Math.sin(this.orbit_v), Math.cos(this.orbit_v), 0,
-                                     0,                       0,                      0, 1);
+        let mat_rot_y = Mat44.rotate_y(-this.orbit_rot_y);
+        let mat_rot_x = Mat44.rotate_x(-this.orbit_rot_x);
 
         // Back away camera from target
-        let mat_back_away = new Mat44(1, 0, 0, 0,
-                                      0, 1, 0, 0,
-                                      0, 0, 1, 0,
-                                      0, 0, -this.target_dist, 1);
+        let mat_back_away = Mat44.translate(0, 0, -this.target_dist);
 
-        let ret_mat = mat_rotate_y.mult(mat_rotate_x).mult(mat_back_away);
-        return ret_mat;
+
+        let ret = mat_translate.mult(mat_rot_y).mult(mat_rot_x).mult(mat_back_away);
+        return ret;
     }
 
     rotate_orbit(disp_h, disp_v) {
-        this.orbit_h = (this.orbit_h + disp_h) % PI2;
+        this.orbit_rot_y = (this.orbit_rot_y - disp_h) % PI2;
 
-        this.orbit_v += disp_v;
+        this.orbit_rot_x -= disp_v;
 
-        if (this.orbit_v > PI_HALF) {
-            this.orbit_v = PI_HALF;
+        if (this.orbit_rot_x > PI_HALF) {
+            this.orbit_rot_x = PI_HALF;
         }
 
-        if (this.orbit_v < -PI_HALF) {
-            this.orbit_v = -PI_HALF;
+        if (this.orbit_rot_x < -PI_HALF) {
+            this.orbit_rot_x = -PI_HALF;
         }
     }
 
     zoom_dolly(disp) {
-        this.target_dist += disp;
-        if (this.target_dist < this.target_min_dist) {
-            this.target_dist = this.target_min_dist;
-        }
+        this.target_dist = Math.max(this.target_dist + disp, this.target_min_dist);
+    }
+
+    track(disp_x, disp_y) {
+        let mat_rot_y = Mat44.rotate_y(this.orbit_rot_y);
+        let mat_rot_x = Mat44.rotate_x(this.orbit_rot_x);
+
+        // @NOTE: I've no idea why inverting the multiplication of the matrix rotations gives me the correct result. It
+        // should be mat_rot_y * mat_rot_x, in that order.
+        let mat_rot = mat_rot_x.mult(mat_rot_y);
+
+        // Create displacement vector
+        let displ = new Vec3(-disp_x, disp_y, 0);
+        displ = displ.mult_mat(mat_rot);
+
+        // Move target according to the displacement
+        this.target_pos = this.target_pos.add(displ);
     }
 }
 
@@ -211,6 +222,29 @@ class Mat44 {
         );
     }
 
+    static translate(x, y, z) {
+        let ret = new Mat44(1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            x, y, z, 1);
+        return ret;
+    }
+
+    static rotate_x(angle_rad) {
+        let ret = new Mat44(1,                    0,                   0, 0,
+                            0,  Math.cos(angle_rad), Math.sin(angle_rad), 0,
+                            0, -Math.sin(angle_rad), Math.cos(angle_rad), 0,
+                            0,                    0,                   0, 1);
+        return ret;
+    }
+
+    static rotate_y(angle_rad) {
+        let ret = new Mat44(Math.cos(angle_rad), 0, -Math.sin(angle_rad), 0,
+                                              0, 1,                    0, 0,
+                            Math.sin(angle_rad), 0,  Math.cos(angle_rad), 0,
+                                              0, 0,                    0, 1);
+        return ret;
+    }
 }
 
 // ====================================================================================================================
@@ -564,10 +598,12 @@ function frame() {
     mouse_last_pos_x = mouse_pos_x;
     mouse_last_pos_y = mouse_pos_y;
 
-    let mouse_move_amplitude = 0.01;
-
     if (mouse_down) {
-        camera.rotate_orbit(mouse_delta_x * mouse_move_amplitude, mouse_delta_y * mouse_move_amplitude);
+        if (shift_down) {
+            camera.track(mouse_delta_x * mouse_track_amplitude, mouse_delta_y * mouse_track_amplitude);
+        } else {
+            camera.rotate_orbit(mouse_delta_x * mouse_rotate_amplitude, mouse_delta_y * mouse_rotate_amplitude);
+        }
     }
 
     // Mouse wheel
@@ -612,14 +648,8 @@ function frame() {
 
     // Render mesh
     if (mesh != null) {
-        let mat_rot = new Mat44(Math.cos(rot_y_rad),    0,   -Math.sin(rot_y_rad),    0,
-                                                  0,    1,                      0,    0,
-                                Math.sin(rot_y_rad),    0,    Math.cos(rot_y_rad),    0,
-                                                  0,    0,                      0,    1);
-        let mat_pos = new Mat44(1,     0, 0, 0,
-                                0,     1, 0, 0,
-                                0,     0, 1, 0,
-                                0, y_pos, 0, 1);
+        let mat_rot = Mat44.rotate_y(rot_y_rad);
+        let mat_pos = Mat44.translate(0, y_pos, 0);
         let mat_trans = mat_rot.mult(mat_pos);
 
         for (let i = 0; i < mesh.triangles.length; i += 3) {
@@ -800,6 +830,16 @@ window.onload = () => {
             mouse_wheel_dir = -1.0;
         } else {
             mouse_wheel_dir = 0.0;
+        }
+    });
+    document.addEventListener("keydown", e => {
+        if (e.key === "Shift") {
+            shift_down = true;
+        }
+    });
+    document.addEventListener("keyup", e => {
+        if (e.key === "Shift") {
+            shift_down = false;
         }
     });
 
