@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Clipping</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+    <body>
+        <canvas id="viewer" width="640" height="480"></canvas>
+        <br/>
+        <div>
+            <div id="fpscounter">0 FPS</div>
+            <input id="rotate" type="checkbox" name="" value="">
+            <label for="rotate">Animar objeto</label>
+        </div>
+
+        <div class="buttons">
+            <button id="boatbutton">Bote</button>
+            <button id="cubebutton">Cubo</button>
+            <button id="monkeybutton">Mono</button>
+            <button id="trianglebutton">Triángulo</button>
+        </div>
+        <div>
+            <button id="removemodel">Eliminar modelo</button>
+            <input id="inputfile" type="file" />
+        </div>
+
+        <div class="output">
+            <p>OBJ parser log</p>
+            <ul id="logoutput"></ul>
+        </div>
+
+        <p>He implementado la operación de clipping de manera extremadamente sencilla, pero al mismo tiempo incorrecta. La lógica a seguir es que solo se renderizan los triángulos cuyos vértices en el eje z (en camera space) estén contenidos entre el near y far clipping planes. La forma correcta de hacerlo sería utilizando las fórmulas correspondientes en clip space para recortar los triángulos en sub-triángulos.</p>
+
+        <p>Controles</p>
+        <ul>
+            <li>Rotar: click izquierdo del ratón</li>
+            <li>Zoom: rueda del ratón</li>
+            <li>Mover: Shift + click izquierdo del ratón</li>
+        </ul>
+
+        <h2>Limitaciones y bugs</h2>
+        <ul>
+            <li>Los objetos se mueven erráticamente debido a la variabilidad de los FPS.</li>
+            <li>Los objetos no rotan a velocidad uniforme. Esto es debido a la variabilidad de los FPS.</li>
+            <li>La interpolación de colores es incorrecta en determinados ángulos de cámara.</li>
+        </ul>
+
+        <script src="canvas.js"></script>
+    </body>
+</html>
